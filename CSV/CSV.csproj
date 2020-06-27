@@ -13,4 +13,16 @@
       <DocumentationFile>bin\Release\CSV.xml</DocumentationFile>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="obj\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="obj\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="obj\**" />
+    </ItemGroup>
+
 </Project>
