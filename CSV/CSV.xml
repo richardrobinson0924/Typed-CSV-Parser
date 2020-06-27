@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CSV</name>
+    </assembly>
+    <members>
+        <member name="T:CSV.ParseException">
+            <inheritdoc />
+        </member>
+        <member name="M:CSV.ParseException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:CSV.ParseException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="T:CSV.PropertyNameAttribute">
+            <summary>
+            This attribute may be applied to any property of a class or struct to indicate that the custom name should
+            be matched against the headers of the CSV file instead of the name of the attribute
+            </summary>
+            
+            <example>
+            <c>[CSV.PropertyName("value")] public int Num { get; set; }</c>
+            </example>
+        </member>
+        <member name="P:CSV.PropertyNameAttribute.Name">
+            <summary>
+            The name of the property.
+            </summary>
+        </member>
+        <member name="M:CSV.PropertyNameAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of <see cref="T:CSV.PropertyNameAttribute"/> with the specified property name.
+            </summary>
+            <param name="name">The name of the property.</param>
+        </member>
+        <member name="T:CSV.Parsers">
+             <summary>
+             A struct for accessing the map of parsers and implementing custom parsers used by <see cref="T:CSV.Parser`1"/>
+             </summary>
+            
+             By default, all types supported by <see cref="M:System.Convert.ChangeType(System.Object,System.Type)"/> are supported.
+             Parsers for other types can be made available via <see cref="M:CSV.Parsers.RegisterParser``1(System.Converter{System.String,``0})"/>
+        </member>
+        <member name="M:CSV.Parsers.RegisterParser``1(System.Converter{System.String,``0})">
+            <summary>
+            Globally registers a parser for <typeparamref name="T"/>, overriding any parser which may exist for the type.
+            </summary>
+            <param name="parser">a <c>Converter</c> from a string to an arbitrary type <c>T</c></param>
+            <typeparam name="T">a type to make available for parsing into</typeparam>
+            <exception cref="T:System.ArgumentException">if <paramref name="parser"/> is <see cref="M:CSV.Parsers.Parse``1(System.String)"/></exception>
+        </member>
+        <member name="M:CSV.Parsers.Parse``1(System.String)">
+            <summary>
+            Parses <paramref name="s"/> into <typeparamref name="T"/> if <c>T</c> is a supported type for parsing 
+            </summary>
+        </member>
+        <member name="T:CSV.Parser`1">
+             <summary>
+             This class allows CSV text strings to be conveniently and easily parsed into an Enumerable sequence of objects of type <c>TRow</c>
+             </summary>
+            
+             <para>
+             By default, CSV.Parser supports parsing all types supported by <see cref="M:System.Convert.ChangeType(System.Object,System.Type)"/>
+             (and their nullable counterparts if applicable). Parsers for other types may be added via
+             <see cref="M:CSV.Parsers.RegisterParser``1(System.Converter{System.String,``0})"/>.
+             </para>
+            
+             <example>
+             Suppose there exists the following struct <c>Foo</c>:
+             <code>
+             public struct Foo
+             {
+                 [CSV.PropertyName("Value")] public float X { get; set; }
+                 public string Name { get; set; }
+             }
+             </code>
+             Given a <see cref="T:System.IO.TextReader"/> whose contents are
+             <code>
+             Name,Value
+             hello,3.14
+             world
+             </code>
+             each line can be parsed into a <c>Foo</c> object using
+             <code>
+             var csv = new CSV.Parser(reader)
+             foreach (var foo in csv) Console.WriteLine(foo);
+             </code>
+             </example>
+             
+             <typeparam name="TRow">
+             a struct type that satisfies the following properties:
+             <list type="bullet">
+                 <item>It has a no-argument constructor (satisfies the <c>new()</c> constraint)</item>
+                 <item>Any property which should be affected should have an accessor</item>
+             </list>
+             </typeparam>
+        </member>
+        <member name="M:CSV.Parser`1.#ctor(System.IO.TextReader,System.String,System.Int32)">
+            <summary>
+            Creates a new CSV.Parser instance from the specified <c>reader</c> whose lines may be parsed into <c>TRow</c> instances
+            </summary>
+            <param name="reader">a <c>TextReader</c> containing N lines of text, each line containing M data fields
+            separated by a <c>delimiter</c></param>
+            <param name="delimiter">the delimiter to use</param>
+            <param name="initiallySkippedRows">the number of rows to initially skip before processing <paramref name="reader"/>.
+            Useful for possible inclusion of metadata at the beginning of the CSV data.</param>
+            <exception cref="T:System.ArgumentException">The <paramref name="reader"/> is empty</exception>
+            <remarks>It is the caller's responsibility to Dispose of <paramref name="reader"/>.</remarks>
+        </member>
+        <member name="M:CSV.Parser`1.ReadLine">
+            <summary>
+            Parses the next line of the associated <see cref="T:System.IO.TextReader"/> into a <c>TRow</c> object
+            </summary>
+            <returns>The parsed TRow object, or <c>new TRow()</c> if the line is empty
+            or if there are no settable properties</returns>
+            <exception cref="T:CSV.ParseException">There is no valid parser for one of the types of the fields of
+            <typeparamref name="TRow"/>, or a parser threw an Exception while parsing</exception>
+        </member>
+        <member name="M:CSV.Parser`1.GetEnumerator">
+            <summary>
+            Returns an <see cref="T:System.Collections.Generic.IEnumerator`1"/> by repeatedly invoking <see cref="M:CSV.Parser`1.ReadLine"/>.
+            </summary>
+            <returns>an <see cref="T:System.Collections.Generic.IEnumerator`1"/> of all the parsed rows</returns>
+        </member>
+    </members>
+</doc>
